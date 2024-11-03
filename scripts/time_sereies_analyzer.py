@@ -38,3 +38,20 @@ class TimeSeriesAnalyzer:
         plt.grid(axis='y')
         plt.tight_layout()
         plt.show()
+    
+    def cummlative_sum_analysis(self):
+        # Calculate CUSUM (Cumulative Sum of Deviations from Mean)
+        mean_price = self.data['Price'].mean()
+        cusum = (self.data['Price'] - mean_price).cumsum()
+
+        # Plotting the CUSUM line plot
+        plt.figure(figsize=(14, 5))
+        plt.plot(self.data['Date'], cusum, label='CUSUM of Price', color='green')
+
+        # Enhancements for better readability
+        plt.title('CUSUM Line Plot of Brent Oil Price')
+        plt.xlabel('Date')
+        plt.ylabel('Cumulative Sum of Deviations')
+        plt.legend()
+        plt.grid()
+        plt.show()
