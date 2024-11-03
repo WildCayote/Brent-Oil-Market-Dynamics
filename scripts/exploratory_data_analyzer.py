@@ -118,6 +118,62 @@ class EDAAnalyzer:
             value = outliers[outliers['Columns'] == columns[idx]]['Num. of Outliers'].values[0]
             ax.text(x=x_coordinate, y=y_coordinate, s=value, ha='center', va='bottom', weight='bold')
 
+    def numerical_distribution(self) -> None:
+        """
+        A function that will give histogram plots of numerical data with a density curve that shows the distribution of data
+        """
+        
+        # determine the numerical columns and data
+        numerical_data = self.data._get_numeric_data()
+        numerical_cols = numerical_data.columns
+
+        # detrmine number of rows and columns for 
+        num_cols = math.ceil(len(numerical_cols) ** 0.5)
+
+        # calculate the number of rows
+        num_rows = math.ceil(len(numerical_cols) / num_cols)
+
+        # create subpltos
+        fig, axes = plt.subplots(ncols=num_cols, nrows=num_rows, figsize=(14, 9))
+
+        # flatten the axes
+        if len(numerical_cols) > 1:
+            axes = axes.flatten()
+        else:
+            axes = [axes]
+
+        for idx, column in enumerate(numerical_cols):
+            # calculate the median and mean to use in the plots
+            median = self.data[column].median()
+            mean = self.data[column].mean()
+
+            # plot the histplot for that column with a density curve overlayed on it
+            sns.histplot(self.data[column], bins=15, kde=True, ax=axes[idx])
+
+            # add title for the subplot
+            axes[idx].set_title(f"Distribution plot of {column}", fontsize=10)
+
+            # set the x and y labels
+            axes[idx].set_xlabel(column, fontsize=9)
+            axes[idx].set_ylabel("Frequency", fontsize=9)
+
+            # add a lines for indicating the mean and median for the distribution
+            axes[idx].axvline(mean, color='black', linewidth=1, label='Mean') # the line to indicate the mean
+            axes[idx].axvline(median, color='red', linewidth=1, label='Median') # the line to indivate the median 
+
+            # add legends for the mean and median
+            axes[idx].legend()
+
+        # remove unused subplots
+        for unused in range(idx + 1, len(axes)):
+            plt.delaxes(ax=axes[unused])
+        
+        # create a tight layout
+        plt.tight_layout()
+
+        # show the plot
+        plt.show()
+
     def merge_event(self, events_data: pd.DataFrame) -> pd.DataFrame:
         """
         A function that mergres historical event data with price data
