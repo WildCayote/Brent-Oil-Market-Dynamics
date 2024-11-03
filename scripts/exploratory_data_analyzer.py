@@ -61,3 +61,13 @@ class EDAAnalyzer:
 
         # print out the result
         print(f"The data has {percentage}% duplicate data.")
+    
+    def outlire_detection(self) -> None:
+        """
+        A function that performs outlire detection by plotting a box plot.
+        """
+        # create the box plots of the numeric data
+        ax = sns.boxplot(data=self.data, palette='husl')
+        ax.set_title("Box-plot of Categorical Variables", pad=30, fontweight='bold')
+        ax.set_xlabel("Numerical Columns", fontweight='bold', labelpad=10)
+        ax.set_ylabel("Values", fontweight='bold', labelpad=10)
