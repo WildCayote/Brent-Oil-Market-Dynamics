@@ -117,3 +117,36 @@ class EDAAnalyzer:
             # get the value of the coordinate
             value = outliers[outliers['Columns'] == columns[idx]]['Num. of Outliers'].values[0]
             ax.text(x=x_coordinate, y=y_coordinate, s=value, ha='center', va='bottom', weight='bold')
+
+    def merge_event(self, events_data: pd.DataFrame) -> pd.DataFrame:
+        """
+        A function that mergres historical event data with price data
+
+        Args:
+            events_data(pd.DataFrame): the dataframe which contains the historical events
+        
+        Returns:
+            merged_data(pd.DataFrane): a new data frame with the datasets merged
+        """
+        merged_data = pd.DataFrame()
+        merged_data['Date'] = pd.to_datetime(self.data['Date'])
+        events_data['Start'] = pd.to_datetime(events_data['Start'])
+        events_data['End'] = pd.to_datetime(events_data['End'])
+
+        events_expanded = pd.DataFrame({
+            'Date': pd.date_range(start=events_data['Start'].min(), end=events_data['End'].max(), freq='D')
+        })
+
+        merged_data = pd.merge_asof(
+            events_expanded.sort_values('Date'), 
+            events_data.sort_values('Start'), 
+            left_on='Date', 
+            right_on='Start', 
+            direction='backward'
+        )
+
+        merged_data = merged_data.merge(merged_data[['Date', 'Event', 'Category']], on='Date', how='left')
+
+        merged_data.fillna({'Event': 'No Event', 'Category': 'No Category'}, inplace=True)
+
+        return merged_data
