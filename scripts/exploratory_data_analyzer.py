@@ -71,3 +71,49 @@ class EDAAnalyzer:
         ax.set_title("Box-plot of Categorical Variables", pad=30, fontweight='bold')
         ax.set_xlabel("Numerical Columns", fontweight='bold', labelpad=10)
         ax.set_ylabel("Values", fontweight='bold', labelpad=10)
+    
+    def count_outliers(self) -> None:
+        """
+        A function that counts the number of outliers in numerical columns. The amount of data that are outliers and also gives the cut-off point.
+        The cut off points being defined as:
+            - lowerbound = Q1 - 1.5 * IQR
+            - upperbound = Q3 + 1.5 * IQR
+        """
+        # get the numeric data
+        numerical_columns = list(self.data._get_numeric_data().columns)
+        numerical_data = self.data[numerical_columns]
+
+        # obtain the Q1, Q3 and IQR(Inter-Quartile Range)
+        quartile_one = numerical_data.quantile(0.25)
+        quartile_three = numerical_data.quantile(0.75)
+        iqr = quartile_three - quartile_one
+
+        # obtain the upperbound and lowerbound values for each column
+        upper_bound = quartile_three + 1.5 * iqr
+        lower_bound = quartile_one - 1.5 * iqr
+
+        # count all the outliers for the respective columns
+        outliers = {"Columns" : [], "Num. of Outliers": []}
+        for column in lower_bound.keys():
+            column_outliers = self.data[(self.data[column] < lower_bound[column]) | (self.data[column] > upper_bound[column])]
+            count = column_outliers.shape[0]
+
+            outliers["Columns"].append(column)
+            outliers["Num. of Outliers"].append(count)
+
+        outliers = pd.DataFrame.from_dict(outliers).sort_values(by='Num. of Outliers')
+        ax = sns.barplot(outliers, x='Columns', y='Num. of Outliers', palette='husl')
+        ax.set_title("Plot of Skewness values of Numerical Columns", pad=20)
+        ax.set_xlabel("Numerical Columns", weight='bold')
+        ax.set_ylabel("Num. of Outliers", weight="bold")
+        ax.tick_params(axis='x', labelrotation=45)
+
+        columns = outliers['Columns'].unique()
+        for idx, patch in enumerate(ax.patches):
+            # get the corrdinates to write the values
+            x_coordinate = patch.get_x() + patch.get_width() / 2
+            y_coordinate = patch.get_height()
+
+            # get the value of the coordinate
+            value = outliers[outliers['Columns'] == columns[idx]]['Num. of Outliers'].values[0]
+            ax.text(x=x_coordinate, y=y_coordinate, s=value, ha='center', va='bottom', weight='bold')
