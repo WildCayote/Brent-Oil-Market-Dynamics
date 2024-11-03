@@ -2,6 +2,7 @@ import math, warnings
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import ruptures as rpt
 
 warnings.simplefilter(action="ignore")
 
@@ -52,6 +53,36 @@ class TimeSeriesAnalyzer:
         plt.title('CUSUM Line Plot of Brent Oil Price')
         plt.xlabel('Date')
         plt.ylabel('Cumulative Sum of Deviations')
+        plt.legend()
+        plt.grid()
+        plt.show()
+    
+    def event_specific_impact(self):
+        # Extract the price series for change point detection
+        price_series = self.data['Price'].values
+
+        # Apply the CUSUM-based method for change point detection
+        algo = rpt.Binseg(model="l2").fit(price_series)
+        change_points = algo.predict(n_bkps=5)  # Adjust n_bkps for more or fewer breakpoints
+
+        # Extract and print the year of each change point
+        change_years = [self.data['Date'].iloc[cp].year for cp in change_points[:-1]]  
+        print("Detected change point years:", change_years)
+
+        # Plotting the Brent Oil Price with change points
+        plt.figure(figsize=(14, 7))
+        plt.plot(self.data['Date'], self.data['Price'], label='Brent Oil Price', color='blue')
+
+        # Overlay detected change points with year annotations
+        for cp in change_points[:-1]: 
+            year = self.data['Date'].iloc[cp].year
+            plt.axvline(self.data['Date'].iloc[cp], color='red', linestyle='--')
+            plt.text(self.data['Date'].iloc[cp], self.data['Price'].iloc[cp], str(year), color="red", fontsize=10)
+
+        # Enhancements
+        plt.title('Brent Oil Prices with CUSUM Change Points and Years')
+        plt.xlabel('Date')
+        plt.ylabel('Price (USD)')
         plt.legend()
         plt.grid()
         plt.show()
