@@ -23,6 +23,12 @@ class FeatureEngineering:
         data['7D_Change'] = data['Price'] - data['Price'].shift(7)
         data['30D_Change'] = data['Price'] - data['Price'].shift(30)
         return data
+    
+    @staticmethod
+    def create_lag_features(data:pd.DataFrame):
+        data['7D_Change'] = data['Price'].diff(periods=7)
+        data['30D_Change'] = data['Price'].diff(periods=30)
+        return data
 
     @staticmethod
     def add_features(data:pd.DataFrame):
@@ -31,6 +37,7 @@ class FeatureEngineering:
         data = FeatureEngineering.create_rolling_avg(data=data)
         data = FeatureEngineering.create_rolling_volatility(data=data)
         data = FeatureEngineering.create_price_momentum(data=data)
+        data = FeatureEngineering.create_lag_features(data=data)
 
         data = data.set_index('Date')
 
