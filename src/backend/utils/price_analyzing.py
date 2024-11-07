@@ -3,7 +3,7 @@ import numpy as np
 from datetime import timedelta
 from scipy import stats
 
-data_path = '../../data/Brent_Oil_Prices.csv'
+data_path = './data/Brent_Oil_Prices.csv'
 
 def load_price_data():
     """
