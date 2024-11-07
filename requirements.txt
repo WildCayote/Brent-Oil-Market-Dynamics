@@ -7,3 +7,4 @@ seaborn
 ruptures
 arviz
 pymc
+wbdata
