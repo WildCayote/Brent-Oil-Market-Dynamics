@@ -8,3 +8,6 @@ ruptures
 arviz
 pymc
 wbdata
+scikit-learn
+tensorflow
+keras
