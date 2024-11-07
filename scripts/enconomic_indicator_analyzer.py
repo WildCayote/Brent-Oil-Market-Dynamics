@@ -17,6 +17,7 @@ class Analyzer:
             return data
         return pd.DataFrame()
 
+    @staticmethod
     def convert_to_daily(data):
         full_index = pd.date_range(start=data['date'].min(), end=data['date'].max(), freq='D')
         data_daily = data.set_index('date').reindex(full_index)
