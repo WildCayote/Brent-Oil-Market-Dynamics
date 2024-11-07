@@ -3,6 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import ruptures as rpt
+import pymc as pm
+import arviz as az
+import numpy as np
 
 warnings.simplefilter(action="ignore")
 
@@ -86,3 +89,35 @@ class TimeSeriesAnalyzer:
         plt.legend()
         plt.grid()
         plt.show()
+    
+    def baysian_changepoint_analysis(self):
+        analysis_data = self.data['Price'].values
+
+        # Set informative mean priors based on your analysisd
+        prior_mu = np.mean(analysis_data)  # Prior mean for the first segment
+
+        with pm.Model() as model:
+            change_point = pm.DiscreteUniform('change_point', lower=0, upper=len(self.data) - 1)
+            mu1 = pm.Normal('mu1', mu=prior_mu, sigma=5)
+            mu2 = pm.Normal('mu2', mu=prior_mu, sigma=5)
+            sigma1 = pm.HalfNormal('sigma1', sigma=5)
+            sigma2 = pm.HalfNormal('sigma2', sigma=5)
+
+            likelihood = pm.Normal(
+                'likelihood',
+                mu=pm.math.switch(change_point >= np.arange(len(analysis_data)), mu1, mu2),
+                sigma=pm.math.switch(change_point >= np.arange(len(analysis_data)), sigma1, sigma2),
+                observed=analysis_data
+            )
+
+            trace = pm.sample(1000, tune=1000, chains=2, random_seed=42)
+
+            az.plot_trace(trace)
+            plt.show()
+
+            s_posterior = trace.posterior['change_point'].values.flatten()
+            change_point_estimate = int(np.median(s_posterior))
+            change_point_date = self.data.iloc[change_point_estimate]['Date']
+
+            print(f"Estimated Change Point Date: {change_point_date}")
+        
