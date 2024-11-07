@@ -26,11 +26,28 @@ class FeatureEngineering:
 
     @staticmethod
     def add_features(data:pd.DataFrame):
+        data = data.copy()
         data = FeatureEngineering.create_pct_change(data=data)
         data = FeatureEngineering.create_rolling_avg(data=data)
         data = FeatureEngineering.create_rolling_volatility(data=data)
         data = FeatureEngineering.create_price_momentum(data=data)
 
+        data = data.set_index('Date')
+
         return data
 
-    
+    @staticmethod
+    def handle_missing_values(data:pd.DataFrame):
+        data = data.copy()
+
+        # Ensure the date index is properly formatted
+        data.index = pd.to_datetime(data.index)
+        
+        # Create a complete date range and reindex
+        full_date_range = pd.date_range(start=data.index.min(), end=data.index.max(), freq='D')
+        data = data.reindex(full_date_range)
+        
+        # Fill missing values using forward fill
+        data = data.dropna()
+
+        return data
