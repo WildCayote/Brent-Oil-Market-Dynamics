@@ -8,3 +8,4 @@ ruptures
 arviz
 pymc
 wbdata
+scikit-learn
