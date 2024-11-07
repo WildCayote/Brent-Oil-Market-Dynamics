@@ -12,3 +12,4 @@ scikit-learn
 tensorflow
 keras
 flask
+flask-cors
